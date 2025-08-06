@@ -170,6 +170,22 @@ function App() {
           </div>
         )}
       </div>
+
+      <footer className="app-footer">
+        <div className="footer-content">
+          <p>
+            Created by{" "}
+            <a
+              href="https://web.facebook.com/Kentungz.Igna"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              Igna Gilang Faith
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
