@@ -144,7 +144,7 @@ export class Slot {
     }
 
     // Validate that it contains only numbers and minus sign
-    if (/[^0-9-]/g.test(future_stat.toString())) {
+    if (/[^0-9\-]/g.test(future_stat.toString())) {
       return { isValid: false, matCost: "" };
     }
 
@@ -183,7 +183,7 @@ export class Slot {
 
   // Raw override for undo/redo functionality
   rawOverride(data) {
-    const [, delta_steps, id] = data; // slot_num not used, using underscore
+    const [slot_num, delta_steps, id] = data;
 
     if (id !== null) {
       if (id === 0) {
@@ -402,23 +402,6 @@ export class Slot {
     this.currentSteps = this.futureSteps + 0;
     this.new_stat = false;
   }
-
-  // Automation functions
-  runFill() {
-    let penalty = 1 + (this.stat.penalty || 0);
-    let step_pot = penalty * this.stat_data.pot;
-    this.futureSteps = this.currentSteps;
-    let extend = this.currentSteps >= 20;
-    do {
-      this.runStep();
-    } while (this.stat.pot > step_pot && this.futureSteps < (extend ? 28 : 20));
-  }
-
-  runStep() {
-    this.futureSteps = this.currentSteps;
-    this.changeValueBySteps(1, true);
-    this.stat.confirm();
-  }
 }
 
 export class Stat {
@@ -596,6 +579,8 @@ export class Stat {
       this.finished = false;
     }
 
+    // Set potential directly from saved data (like original code)
+    this.future_pot = last_step.pot_before + 0;
     this.pot = last_step.pot_before + 0;
 
     for (let mat in last_step.step_mats) {
@@ -611,9 +596,6 @@ export class Stat {
       this.slots[slot_num].rawOverride(instruction);
     }
 
-    // Recalculate future_pot based on current slot values
-    this.onUpdate();
-
     this.steps.buildCondensedFormula();
   }
 
@@ -621,6 +603,8 @@ export class Stat {
     let last_step = this.steps.redo();
     this.resetToBase();
 
+    // Set potential directly from saved data (like original code)
+    this.future_pot = last_step.pot_after + 0;
     this.pot = last_step.pot_after + 0;
 
     for (let mat in last_step.step_mats) {
@@ -633,9 +617,6 @@ export class Stat {
       let slot_num = instruction[0];
       this.slots[slot_num].rawOverride(instruction);
     }
-
-    // Recalculate future_pot based on current slot values
-    this.onUpdate();
 
     if (last_step.finished) {
       this.finished = last_step.finished;
@@ -656,57 +637,5 @@ export class Stat {
     }
 
     this.confirm();
-  }
-
-  // Saving functionality
-  grabSnapshot() {
-    return {
-      formula: deep_clone(this.steps.formula),
-      settings: {
-        tec: this.tec,
-        proficiency: this.proficiency,
-        mat_reduction: this.mat_reduction,
-        type: this.type,
-        recipe_pot: this.recipe_pot,
-        future_pot: this.future_pot,
-        starting_pot: this.starting_pot,
-        potential_return: this.potential_return,
-        bonus_potential_return: this.bonus_potential_return,
-        finished: this.finished,
-        max_mats: this.max_mats,
-      },
-    };
-  }
-
-  autoLoad(data) {
-    const formula = data.formula;
-    this.steps.formula = formula;
-    this.steps.buildCondensedFormula();
-    Object.assign(this, data.settings);
-
-    for (let step of formula) {
-      this.runStepInstruction(step);
-    }
-  }
-
-  runStepInstruction(instruction) {
-    this.future_pot = instruction.pot_after;
-    this.pot = this.finished ? instruction.pot_before : instruction.pot_after;
-
-    for (let mat in instruction.step_mats) {
-      this.mats[mat] += instruction.step_mats[mat];
-    }
-
-    const step_data = instruction.code;
-    for (const instr of step_data) {
-      let slot_num = instr[0];
-      this.slots[slot_num].rawOverride(instr);
-    }
-
-    if (instruction.finished) {
-      this.finished = instruction.finished;
-    }
-
-    this.steps.buildCondensedFormula();
   }
 }

@@ -91,8 +91,8 @@ const SettingsPanel = memo(
             </label>
           </div>
           <div className="form-group">
-            <button onClick={onStartSimulation} disabled={isSimulationActive}>
-              🚀 {isSimulationActive ? "Simulasi Aktif" : "Mulai Simulasi"}
+            <button onClick={onStartSimulation}>
+              🚀 {isSimulationActive ? "Reset & Mulai Ulang" : "Mulai Simulasi"}
             </button>
           </div>
         </div>

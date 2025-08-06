@@ -46,7 +46,7 @@ const SlotRow = memo(({ slotIndex, slot, stat, onSlotChange }) => {
         updateInputClass(result.validation);
       }
     },
-    [slotIndex, inputValue, onSlotChange, updateInputClass]
+    [slotIndex, inputValue, onSlotChange]
   );
 
   const updateSimulation = useCallback(
@@ -59,7 +59,7 @@ const SlotRow = memo(({ slotIndex, slot, stat, onSlotChange }) => {
         }
       }
     },
-    [selectedOption, slotIndex, onSlotChange, updateInputClass]
+    [selectedOption, slotIndex, onSlotChange]
   );
 
   const handleInputChange = useCallback(
@@ -159,50 +159,6 @@ const SlotRow = memo(({ slotIndex, slot, stat, onSlotChange }) => {
         max="999"
         step="1"
         onChange={(e) => handleInputChange(e.target.value)}
-        onKeyDown={(e) => {
-          // Handle keyboard shortcuts untuk automasi game
-          const charCode = e.which || e.keyCode;
-
-          // Izinkan semua shortcut Ctrl/Cmd
-          if (e.ctrlKey || e.metaKey) {
-            return;
-          }
-
-          if (charCode === 38 || charCode === 81) {
-            // panah atas atau Q - tambah 1 step
-            e.preventDefault();
-            // TODO: Implement step increase
-          } else if (charCode === 40 || charCode === 87) {
-            // panah bawah atau W - kurangi 1 step
-            e.preventDefault();
-            // TODO: Implement step decrease
-          } else if (charCode === 13) {
-            // enter - konfirmasi step
-            e.preventDefault();
-            // TODO: Implement confirm
-          } else if (charCode === 65 && !e.ctrlKey) {
-            // A - set ke maksimum (all)
-            e.preventDefault();
-            // TODO: Implement set to max
-          } else if (charCode === 68 && !e.ctrlKey) {
-            // D - set ke minimum
-            e.preventDefault();
-            // TODO: Implement set to min
-          } else if (charCode === 70 && !e.ctrlKey) {
-            // F - fill otomatis
-            e.preventDefault();
-            // TODO: Implement fill
-          } else if (charCode === 83 && !e.ctrlKey) {
-            // S - step otomatis
-            e.preventDefault();
-            // TODO: Implement step
-          } else if (charCode === 82 && !e.ctrlKey) {
-            // R - redo
-            e.preventDefault();
-            // TODO: Implement redo
-          }
-          // Biarkan browser menangani input angka secara default
-        }}
       />
       <span className="mat-cost">{matCost}</span>
     </div>

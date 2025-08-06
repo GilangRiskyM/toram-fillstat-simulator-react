@@ -1,10 +1,10 @@
 import { memo, useMemo } from "react";
 
 const ResultsPanel = memo(
-  ({ stat, onConfirm, onUndo, onRedo, onRepeat }) => {
+  ({ stat, onConfirm, onUndo, onRedo, onRepeat, updateTrigger }) => {
     const potentialDisplay = useMemo(() => {
       return `Potential: ${stat.future_pot} / ${stat.pot}`;
-    }, [stat.future_pot, stat.pot]);
+    }, [stat.future_pot, stat.pot, updateTrigger]);
 
     const successRateData = useMemo(() => {
       const rate = stat.getSuccessRate();
@@ -23,7 +23,7 @@ const ResultsPanel = memo(
         className: rateClass,
         display: `Success Rate: ${rate}%`,
       };
-    }, [stat]);
+    }, [stat, updateTrigger]);
 
     const formulaDisplay = useMemo(() => {
       let display = stat.steps.getDisplay();
@@ -59,7 +59,7 @@ const ResultsPanel = memo(
       }`;
 
       return content;
-    }, [stat]);
+    }, [stat, updateTrigger]);
 
     const materialData = useMemo(() => {
       const materials = [
@@ -75,16 +75,17 @@ const ResultsPanel = memo(
         ...mat,
         amount: stat.mats[mat.key] || 0,
       }));
-    }, [stat.mats]);
+    }, [stat.mats, updateTrigger]);
 
     const buttonStates = useMemo(() => {
       return {
         confirmDisabled: stat.pot === stat.future_pot || stat.finished,
         undoDisabled: !stat.steps.formula.length,
         redoDisabled: !stat.steps.redo_queue.length,
-        repeatDisabled: !stat.steps.formula.length || stat.finished,
+        repeatDisabled:
+          !stat.steps.formula.length || stat.finished || stat.future_pot <= 0,
       };
-    }, [stat]);
+    }, [stat, updateTrigger]);
 
     return (
       <div className="results-section">
