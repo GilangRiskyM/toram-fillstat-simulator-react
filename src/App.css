@@ -353,3 +353,44 @@ h1 {
     min-width: unset;
   }
 }
+
+/* Footer Styles */
+.app-footer {
+  margin-top: 40px;
+  padding: 20px 0;
+  border-top: 2px solid #e1e8ed;
+  background: #f8f9fa;
+}
+
+.footer-content {
+  text-align: center;
+}
+
+.footer-content p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.footer-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .app-footer {
+    margin-top: 30px;
+    padding: 15px 0;
+  }
+  
+  .footer-content p {
+    font-size: 12px;
+  }
+}
