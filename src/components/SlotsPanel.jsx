@@ -3,7 +3,9 @@ import { OPTIONS } from "../utils/constants.js";
 
 const SlotRow = memo(({ slotIndex, slot, stat, onSlotChange }) => {
   const [selectedOption, setSelectedOption] = useState(slot.stat_data_id || 0);
-  const [inputValue, setInputValue] = useState(slot.futureStat || 0);
+  const [inputValue, setInputValue] = useState(
+    slot.futureStat?.toString() || "0"
+  );
   const [matCost, setMatCost] = useState("");
   const [inputClass, setInputClass] = useState("stat-input");
   const debounceRef = useRef(null);
@@ -20,13 +22,16 @@ const SlotRow = memo(({ slotIndex, slot, stat, onSlotChange }) => {
   // Update local state when slot data changes
   useEffect(() => {
     setSelectedOption(slot.stat_data_id || 0);
-    // Only update input value if it's different and not currently being edited
-    if (
-      slot.futureStat !== inputValue &&
-      document.activeElement !==
-        document.querySelector(`input[data-slot="${slotIndex}"]`)
-    ) {
-      setInputValue(slot.futureStat || 0);
+    // Hanya update jika input tidak sedang difocus dan nilai benar-benar berbeda
+    const inputElement = document.querySelector(
+      `input[data-slot="${slotIndex}"]`
+    );
+    const isInputFocused = document.activeElement === inputElement;
+    const currentInputNum = parseInt(inputValue) || 0;
+    const slotNum = slot.futureStat || 0;
+
+    if (!isInputFocused && currentInputNum !== slotNum) {
+      setInputValue(slotNum.toString());
     }
   }, [slot.stat_data_id, slot.futureStat, slotIndex, inputValue]);
 
@@ -35,12 +40,19 @@ const SlotRow = memo(({ slotIndex, slot, stat, onSlotChange }) => {
       setSelectedOption(newOptionId);
 
       if (newOptionId === 0 || newOptionId === "0") {
-        setInputValue(0);
+        setInputValue("0");
         setMatCost("");
         setInputClass("stat-input");
+        return;
       }
 
-      const result = onSlotChange(slotIndex, parseInt(newOptionId), inputValue);
+      // Gunakan nilai input saat ini
+      const currentValue = parseInt(inputValue) || 0;
+      const result = onSlotChange(
+        slotIndex,
+        parseInt(newOptionId),
+        currentValue
+      );
       if (result) {
         setMatCost(result.matCost || "");
         updateInputClass(result.validation);
@@ -63,18 +75,22 @@ const SlotRow = memo(({ slotIndex, slot, stat, onSlotChange }) => {
   );
 
   const handleInputChange = useCallback(
-    (newValue) => {
-      // Update state langsung karena type="number" sudah menangani validasi
-      setInputValue(newValue);
+    (e) => {
+      const value = e.target.value;
 
-      // Debounce update simulasi untuk menghindari kalkulasi berlebihan
+      // Langsung update tampilan tanpa delay
+      setInputValue(value);
+
+      // Debounce untuk simulasi saja
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
 
       debounceRef.current = setTimeout(() => {
-        updateSimulation(newValue);
-      }, 100); // 100ms debounce
+        const numValue = parseInt(value) || 0;
+        const boundedValue = Math.max(-9999, Math.min(9999, numValue));
+        updateSimulation(boundedValue);
+      }, 500); // Perbesar delay agar user punya waktu mengetik
     },
     [updateSimulation]
   );
@@ -149,16 +165,50 @@ const SlotRow = memo(({ slotIndex, slot, stat, onSlotChange }) => {
       </select>
       <input
         className={inputClass}
-        type="number"
-        maxLength="4"
-        size="4"
+        type="text"
+        placeholder="0"
         disabled={isInputDisabled}
         value={inputValue}
         data-slot={slotIndex}
-        min="-999"
-        max="999"
-        step="1"
-        onChange={(e) => handleInputChange(e.target.value)}
+        onChange={handleInputChange}
+        onFocus={(e) => {
+          // Select all saat focus pertama kali
+          e.target.select();
+        }}
+        onBlur={(e) => {
+          // Hanya cleanup saat benar-benar blur (tidak dalam proses typing)
+          if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+          }
+
+          const value = e.target.value.trim();
+          let finalValue;
+
+          if (value === "" || value === "-" || isNaN(parseInt(value))) {
+            finalValue = 0;
+          } else {
+            const numValue = parseInt(value);
+            finalValue = Math.max(-9999, Math.min(9999, numValue));
+          }
+
+          // Update nilai dan simulasi
+          setInputValue(finalValue.toString());
+          updateSimulation(finalValue);
+        }}
+        // Hindari event yang bisa menyebabkan blur tidak diinginkan
+        onKeyDown={(e) => {
+          // Hanya handle key yang benar-benar perlu
+          if (e.key === "Tab") {
+            // Biarkan Tab berpindah secara natural
+            return;
+          }
+          if (e.key === "Enter") {
+            // Enter akan blur tapi controlled
+            e.target.blur();
+            return;
+          }
+          // Jangan handle key lain agar input tetap normal
+        }}
       />
       <span className="mat-cost">{matCost}</span>
     </div>
@@ -174,7 +224,7 @@ const SlotsPanel = memo(({ stat, onSlotChange, updateTrigger }) => {
       <div className="slots-container">
         {stat.slots.map((slot, index) => (
           <SlotRow
-            key={`${index}-${updateTrigger}`}
+            key={index} // Gunakan index saja, lebih stabil
             slotIndex={index}
             slot={slot}
             stat={stat}

@@ -154,30 +154,65 @@ h1 {
   text-align: center;
   font-weight: bold;
   color: #7f8c8d;
+  flex-shrink: 0;
 }
 
 .stat-select {
   flex: 2;
-  padding: 8px;
+  padding: 12px 10px;
   border: 2px solid #bdc3c7;
-  border-radius: 5px;
+  border-radius: 6px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
+  background-color: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+.stat-select:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  border-color: #dee2e6;
 }
 
 .stat-input {
   flex: 1;
-  max-width: 80px;
-  padding: 8px;
+  max-width: 120px;
+  min-width: 80px;
+  padding: 12px 10px;
   border: 2px solid #bdc3c7;
-  border-radius: 5px;
+  border-radius: 6px;
   font-family: 'JetBrains Mono', monospace;
   text-align: center;
+  font-size: 16px;
+  font-weight: normal;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.stat-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
 }
 
 .stat-input:disabled {
   background-color: #f8f9fa;
   color: #6c757d;
+  cursor: not-allowed;
+  border-color: #dee2e6;
+}
+
+.stat-input::placeholder {
+  color: #adb5bd;
+  font-size: 14px;
 }
 
 .stat-input.valid {
@@ -198,6 +233,9 @@ h1 {
   font-size: 12px;
   font-weight: bold;
   min-width: 120px;
+  flex-shrink: 0;
+  text-align: left;
+  padding-left: 5px;
 }
 
 .results-section {
@@ -342,7 +380,55 @@ h1 {
   
   .slot-row {
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
+    align-items: stretch;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+
+  .slot-number {
+    width: auto;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #495057;
+    background: #e9ecef;
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+  }
+
+  .stat-select {
+    flex: none;
+    width: 100%;
+    padding: 15px 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+  }
+
+  .stat-input {
+    flex: none;
+    max-width: none;
+    min-width: auto;
+    width: 100%;
+    padding: 15px 12px;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 8px;
+  }
+
+  .mat-cost {
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+    padding: 8px;
+    background: #e8f5e8;
+    border-radius: 6px;
+    color: #28a745;
   }
   
   .controls {
